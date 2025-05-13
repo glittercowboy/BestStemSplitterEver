@@ -3,22 +3,10 @@ import os
 import sys
 import subprocess
 import shutil
-import time
-import re
-from pathlib import Path
-import glob
 import yaml
 import argparse
 import platform  # NEW: For platform detection
-
-# Try to import librosa, but provide helpful message if not installed
-try:
-    import librosa
-except ImportError:
-    print("Error: librosa is not installed.")
-    print("Please install it using: pip install librosa")
-    print("See requirements.txt for all dependencies.")
-    sys.exit(1)
+import librosa
 
 def load_config(config_path=None):
     """Load configuration from YAML file or use defaults."""
@@ -30,8 +18,8 @@ def load_config(config_path=None):
     # Default configuration
     default_config = {
         "paths": {
-            "temp_dir": "~/BestStemSplitterEver/temp",
-            "output_dir": "~/Music/Stems"
+            "temp_dir": "./temp",
+            "output_dir": "./stems"
         },
         "tools": {
             "drumsep_dir": "./drumsep",  # CHANGED: Use relative path
@@ -72,7 +60,7 @@ def load_config(config_path=None):
     config["paths"]["temp_dir"] = os.path.expanduser(config["paths"]["temp_dir"])
     config["paths"]["output_dir"] = os.path.expanduser(config["paths"]["output_dir"])
     
-    # CHANGED: Only expand drumsep_dir if it's an absolute path
+    # CHANGED: Only expand drumsep_dir if it's relative to $HOME
     if config["tools"]["drumsep_dir"].startswith("~"):
         config["tools"]["drumsep_dir"] = os.path.expanduser(config["tools"]["drumsep_dir"])
     else:
@@ -150,7 +138,7 @@ def format_filename(template, data):
     """Format a filename according to the template."""
     return template.format(**data)
 
-# NEW: Cross-platform way to open a folder
+# Cross-platform way to open a folder
 def open_folder(folder_path):
     """Open the folder in the system file explorer in a platform-independent way."""
     try:
@@ -158,11 +146,20 @@ def open_folder(folder_path):
             os.startfile(folder_path)
         elif platform.system() == "Darwin":  # macOS
             subprocess.run(["open", folder_path], check=True)
+        elif "microsoft" in platform.uname().release.lower():  # WSL
+            # Convert WSL path to Windows path using wslpath
+            windows_path = subprocess.check_output(["wslpath", "-w", folder_path], text=True).strip()
+            try:
+                subprocess.run(["explorer.exe", windows_path], check=True)
+            except subprocess.CalledProcessError:
+                # Ignore non-zero exit status from explorer.exe in WSL
+                print(f"✅ Opened result folder (ignoring exit status): {folder_path}")
         else:  # Linux and others
             subprocess.run(["xdg-open", folder_path], check=True)
         print(f"✅ Opened result folder: {folder_path}")
     except Exception as e:
         print(f"⚠️ Could not open folder: {e}")
+
 
 def run_drumsep(drums_file, output_dir, drumsep_dir):
     """Run drumsep using the Python module instead of bash script."""

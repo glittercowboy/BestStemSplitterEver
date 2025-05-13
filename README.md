@@ -10,11 +10,6 @@ A powerful audio stem splitter that detects key and BPM, separates tracks into s
 - 🏷️ Names files with key and BPM information for easy organization
 - ⚙️ Configurable output directories and file naming
 
-## Requirements
-
-- Python 3.8 or higher
-- Demucs (for stem separation)
-- Drumsep (for drum separation)
 
 ## Installation
 
@@ -25,95 +20,30 @@ A powerful audio stem splitter that detects key and BPM, separates tracks into s
    cd BestStemSplitterEver
    ```
 
-2. Install Python dependencies:
 
-   ```
-   pip install -r requirements.txt
-   ```
+2. Install Poetry if you don't have it already
+(official docs: https://python-poetry.org/docs/#installation):
 
-3. Install Demucs:
-
-   ```
-   pip install -U demucs
-   ```
-
-4. Install Drumsep:
-
-   ```
-   cd drumsep &&
-   bash drumsepInstall
-   ```
-
-## Cross-Platform Installation
-
-### Windows
-
-1. Install Python 3.8+ from [python.org](https://python.org)
-2. Double-click `setup.bat` to install all dependencies
-3. Drag and drop any audio file onto `run.bat` to process it
-
-### macOS
-
-1. Make sure Python 3.8+ is installed
-2. Open Terminal in the project directory
-3. Run: `chmod +x setup.sh run.sh`
-4. Run: `./setup.sh`
-5. Process an audio file: `./run.sh your_song.mp3`
-
-### Linux
-
-1. Make sure Python 3.8+ is installed
-2. Open Terminal in the project directory
-3. Run: `chmod +x setup.sh run.sh`
-4. Run: `./setup.sh`
-5. Process an audio file: `./run.sh your_song.mp3`
-
-### Note for macOS/Linux Users
-
-If you encounter any "Permission denied" errors when running the scripts, you may need to fix the permissions first:
-
-```bash
-chmod +x fix_permissions.sh
-./fix_permissions.sh
+```sh
+curl -sSL https://install.python-poetry.org | python3 -
 ```
 
-## Configuration
-
-Edit the `config.yaml` file to customize your setup:
-
-```yaml
-# BestStemSplitterEver Configuration
-
-# Directories
-paths:
-  # Where temporary demucs files will be stored
-  temp_dir: "~/BestStemSplitter/temp"
-
-  # Where final stems will be saved
-  output_dir: "~/Music/Stems"
-
-# Tools configuration
-tools:
-  # Path to drumsep directory
-  drumsep_dir: "~/BestStemSplitter/drumsep"
-
-# Output preferences
-output:
-  # Whether to organize output in folders by song name
-  organize_by_song: true
-
-  # Whether to include key and BPM in filename
-  include_key_bpm: true
-
-  # Format for output filenames
-  filename_format: "{key} - {bpm}BPM - {name} - ({stem})"
+3. Install dependencies and download the drum separation model
+```sh
+poetry install
+poetry run download-model
 ```
 
-## Usage
+To Run the stem splitter:
+```sh
+poetry run stem-splitter path/to/your_audio_file.wav
+```
 
-```
-python stem_splitter.py <audio_file>
-```
+- The output will be placed in the folder specified by `output_dir` in `config.yaml` (default: `~/Music/Stems`). Edit the `config.yaml` file to customize your setup
+- You can override the output directory or config file with command-line options:
+  ```sh
+  poetry run stem-splitter path/to/your_audio_file.wav --output path/to/output_dir
+  ```
 
 ### Options:
 
@@ -131,35 +61,22 @@ python stem_splitter.py <audio_file>
 
 ### Examples:
 
-```bash
+```sh
 # Split a song with default configuration
-python stem_splitter.py my_song.mp3
+poetry run stem-splitter my_song.mp3
 
 # Use a custom config file
-python stem_splitter.py my_song.mp3 --config my_config.yaml
+poetry run stem-splitter my_song.mp3 --config my_config.yaml
 
 # Specify output directory
-python stem_splitter.py my_song.mp3 --output ~/Desktop/MySongStems
+poetry run stem-splitter my_song.mp3 --output ~/Desktop/MySongStems
 
 # Use a different model
-python stem_splitter.py my_song.mp3 --model htdemucs
+poetry run stem-splitter my_song.mp3 --model htdemucs
 
 # Combine options
-python stem_splitter.py my_song.mp3 --model mdx_extra --output ~/Desktop/HighQualityStems
+poetry run stem-splitter my_song.mp3 --model mdx_extra --output ~/Desktop/HighQualityStems
 ```
-
-## Important Note
-
-This project requires PyTorch 2.5.1 or earlier to work properly with the drum separation model. The requirements.txt file specifies the correct version.
-
-If you encounter any issues with model loading, you may need to set the following environment variable:
-
-```bash
-export TORCH_WEIGHTS_ONLY=0
-<<<<<<< HEAD
-```
-=======
->>>>>>> ddee2710f5aba27dc4eacbbdfdfcb4651a7700e9
 
 ## Output
 
@@ -176,6 +93,7 @@ The script will create:
 3. It uses Drumsep to separate drum components
 4. All files are organized and named according to your preferences
 
+
 ## License
 
 MIT License
@@ -185,10 +103,7 @@ MIT License
 - [Demucs](https://github.com/facebookresearch/demucs) for audio source separation
 - [Librosa](https://github.com/librosa/librosa) for audio analysis
 - [drumSep](https://github.com/inagoy/drumsep) for drum separation
-<<<<<<< HEAD
 
-```
-
-=======
->>>>>>> ddee2710f5aba27dc4eacbbdfdfcb4651a7700e9
-```
+# Alternative models
+Improved version of the drum separation model used by BestStemSplitterEver for potential future inclusion:
+https://github.com/jarredou/models/releases/tag/aufr33-jarredou_MDX23C_DrumSep_model_v0.1
